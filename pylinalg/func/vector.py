@@ -473,5 +473,39 @@ def vector_make_spherical_safe(vector, /, *, out=None, dtype=None):
 
     return out
 
+def vector_quaternion_to_euler(quaternion, /, *, order="XYZ", out=None, dtype=None):
+    """Convert a quaternion to euler angles.
+
+    Parameters
+    ----------
+    quaternion : ndarray, [4]
+        A quaternion in xyzw format.
+    order : string, optional
+        The order in which the rotations should be returned. Default
+        is "xyz".
+    out : ndarray, optional
+        A location into which the result is stored. If provided, it
+        must have a shape that the inputs broadcast to. If not provided or
+        None, a freshly-allocated array is returned. A tuple must have
+        length equal to the number of outputs.
+    dtype : data-type, optional
+        Overrides the data type of the result.
+
+    Returns
+    -------
+    euler_angles : ndarray, [3]
+        A vector of euler angles with the corresponding angle values.
+
+    """
+
+    quaternion = np.asarray(quaternion)
+    batch_shape = quaternion.shape[:-1] if len(order) > 1 else quaternion.shape
+
+    if out is None:
+        out = np.empty((*batch_shape, len(order)), dtype=dtype)
+
+    # work out the sequence in which to apply the rotations
+    is_extrinsic = [x.isupper() for x in order]
+    order = [{"X": 0, "Y": 1, "Z": 2}[x.upper()] for x in order]
 
 __all__ = [name for name in globals() if name.startswith("vector_")]
